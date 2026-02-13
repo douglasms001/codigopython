@@ -1,0 +1,146 @@
+import csv
+
+# =========================
+# CLASSE BASE
+# =========================
+
+class Imovel:
+    def __init__(self, valor_base):
+        self.valor = valor_base
+
+    def adicionar(self, valor):
+        self.valor += valor
+
+    def aplicar_desconto(self, percentual):
+        self.valor *= (1 - percentual / 100)
+
+    def get_valor(self):
+        return round(self.valor, 2)
+
+
+# =========================
+# APARTAMENTO
+# =========================
+
+class Apartamento(Imovel):
+    def __init__(self):
+        super().__init__(700)
+
+    def configurar(self):
+        quartos = int(input("1 ou 2 quartos? "))
+        if quartos == 2:
+            self.adicionar(200)
+
+        garagem = input("Garagem? (s/n): ").strip().lower()
+        if garagem == "s":
+            self.adicionar(300)
+
+        # >>> DESCONTO CORRIGIDO
+        crianca = input("Possui crianças? (s/n): ").strip().lower()
+
+        if crianca == "n":
+            self.aplicar_desconto(5)
+            print(">>> Desconto de 5% aplicado!")
+        elif crianca == "s":
+            print(">>> Sem desconto aplicado.")
+        else:
+            print("Entrada inválida — assumindo que possui crianças.")
+
+
+# =========================
+# CASA
+# =========================
+
+class Casa(Imovel):
+    def __init__(self):
+        super().__init__(900)
+
+    def configurar(self):
+        quartos = int(input("1 ou 2 quartos? "))
+        if quartos == 2:
+            self.adicionar(250)
+
+        garagem = input("Garagem? (s/n): ").strip().lower()
+        if garagem == "s":
+            self.adicionar(300)
+
+
+# =========================
+# ESTÚDIO
+# =========================
+
+class Estudio(Imovel):
+    def __init__(self):
+        super().__init__(1200)
+
+    def configurar(self):
+        vagas = int(input("Quantidade de vagas: "))
+        if vagas >= 2:
+            self.adicionar(250 + (vagas - 2) * 60)
+
+
+# =========================
+# ORÇAMENTO
+# =========================
+
+class Orcamento:
+    def __init__(self, valor_mensal):
+        self.valor_mensal = valor_mensal
+        self.contrato = 2000
+
+    def mostrar_contrato(self):
+        parcelas = int(input("Parcelar contrato em até 5x: "))
+
+        if parcelas < 1 or parcelas > 5:
+            print("Número inválido. Usando 5x.")
+            parcelas = 5
+
+        valor = self.contrato / parcelas
+        print(f"Valor da parcela do contrato: R${valor:.2f}")
+
+    def gerar_csv(self):
+        with open("parcelas.csv", "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["Mes", "Valor"])
+
+            for i in range(1, 13):
+                writer.writerow([i, self.valor_mensal])
+
+        print("Arquivo parcelas.csv gerado com sucesso!")
+
+
+# =========================
+# EXECUÇÃO PRINCIPAL
+# =========================
+
+print("===== GERADOR DE ORÇAMENTO =====")
+print("1 - Apartamento")
+print("2 - Casa")
+print("3 - Estúdio")
+
+try:
+    op = int(input("Escolha o tipo: "))
+except:
+    op = 1
+
+if op == 1:
+    imovel = Apartamento()
+elif op == 2:
+    imovel = Casa()
+elif op == 3:
+    imovel = Estudio()
+else:
+    print("Opção inválida — usando Apartamento.")
+    imovel = Apartamento()
+
+imovel.configurar()
+
+valor = imovel.get_valor()
+
+print(f"\n>>> Valor do aluguel mensal: R${valor:.2f}")
+
+orc = Orcamento(valor)
+orc.mostrar_contrato()
+orc.gerar_csv()
+
+print("\nProcesso finalizado!")
